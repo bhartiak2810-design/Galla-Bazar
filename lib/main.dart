@@ -95,5 +95,198 @@ class _ScrapPageState extends State<ScrapPage>{double balance=0;final v=TextEdit
 class OffersPage extends StatelessWidget{const OffersPage({super.key});@override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('Offers')),body:ListView(padding:EdgeInsets.all(12),children:[Info('🎁 पहली बार 10 kg आटा ऑर्डर पर कंटेनर फ्री।'),SizedBox(height:10),Info('♻️ स्क्रैप दें और reward value पाएं।'),SizedBox(height:10),Info('🔁 3 महीने लगातार खरीदारी पर पात्र ग्राहकों के लिए कंटेनर change सुविधा।')]));}
 
 class FormPage extends StatelessWidget{final String title;final List<String> fields;const FormPage(this.title,this.fields,{super.key});@override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:Text(title)),body:ListView(padding:const EdgeInsets.all(16),children:[for(final f in fields)Padding(padding:const EdgeInsets.only(bottom:10),child:TextField(decoration:InputDecoration(labelText:f,border:const OutlineInputBorder()))),FilledButton(onPressed:()=>ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('Submitted (Demo)'))),child:const Text('Submit'))]));}
-class CartPage extends StatelessWidget{final int count;const CartPage(this.count,{super.key});@override Widget build(BuildContext context)=>Scaffold(appBar:AppBar(title:const Text('Cart / Checkout')),body:Padding(padding:const EdgeInsets.all(16),child:Column(children:[ListTile(title:Text('Cart items: $count'),subtitle:const Text('COD + Online Payment')),const Info('Delivery: 485001 और 485005 में 1 दिन; अन्य enabled areas में लगभग 3 दिन।')])));}
+class CartPage extends StatelessWidget{
+  final int count;
+  const CartPage(this.count,{super.key});
+  @override Widget build(BuildContext context)=>Scaffold(
+    appBar:AppBar(title:const Text('Cart')),
+    body:ListView(
+      padding:const EdgeInsets.all(16),
+      children:[
+        Card(
+          child:ListTile(
+            leading:const Icon(Icons.shopping_basket),
+            title:Text('Cart items: $count'),
+            subtitle:const Text('Products और quantity की final summary'),
+          ),
+        ),
+        const Info('Delivery: 485001 और 485005 में 1 दिन; अन्य enabled areas में लगभग 3 दिन।'),
+        const SizedBox(height:12),
+        FilledButton.icon(
+          onPressed: count==0 ? null : ()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>CheckoutPage(itemCount:count))),
+          icon:const Icon(Icons.arrow_forward),
+          label:const Text('Proceed to Checkout'),
+        ),
+      ],
+    ),
+  );
+}
+
+class CheckoutPage extends StatefulWidget{
+  final int itemCount;
+  const CheckoutPage({super.key,required this.itemCount});
+  @override State<CheckoutPage> createState()=>_CheckoutPageState();
+}
+
+class _CheckoutPageState extends State<CheckoutPage>{
+  final name=TextEditingController();
+  final mobile=TextEditingController();
+  final address=TextEditingController();
+  final pincode=TextEditingController(text:'485001');
+  String payment='COD';
+  bool useScrap=false;
+
+  String get eta => (pincode.text.trim()=='485001'||pincode.text.trim()=='485005')
+      ? '1 दिन के अंदर'
+      : 'लगभग 3 दिन';
+
+  @override Widget build(BuildContext context)=>Scaffold(
+    appBar:AppBar(title:const Text('Checkout')),
+    body:ListView(
+      padding:const EdgeInsets.all(16),
+      children:[
+        const Text('Delivery Address',style:TextStyle(fontSize:18,fontWeight:FontWeight.bold)),
+        const SizedBox(height:10),
+        TextField(controller:name,decoration:const InputDecoration(labelText:'नाम / Name',border:OutlineInputBorder())),
+        const SizedBox(height:10),
+        TextField(controller:mobile,keyboardType:TextInputType.phone,decoration:const InputDecoration(labelText:'मोबाइल नंबर',border:OutlineInputBorder())),
+        const SizedBox(height:10),
+        TextField(controller:address,maxLines:2,decoration:const InputDecoration(labelText:'पूरा पता / Address',border:OutlineInputBorder())),
+        const SizedBox(height:10),
+        TextField(
+          controller:pincode,
+          keyboardType:TextInputType.number,
+          onChanged:(_)=>setState((){}),
+          decoration:const InputDecoration(labelText:'PIN Code',border:OutlineInputBorder()),
+        ),
+        const SizedBox(height:12),
+        Info('Expected Delivery: $eta'),
+        const SizedBox(height:12),
+        const Text('Payment Method',style:TextStyle(fontSize:18,fontWeight:FontWeight.bold)),
+        RadioListTile<String>(
+          value:'COD',groupValue:payment,
+          onChanged:(v)=>setState(()=>payment=v!),
+          title:const Text('Cash on Delivery (COD)'),
+        ),
+        RadioListTile<String>(
+          value:'ONLINE',groupValue:payment,
+          onChanged:(v)=>setState(()=>payment=v!),
+          title:const Text('Online Payment'),
+          subtitle:const Text('UPI / Card / Net Banking - demo flow'),
+        ),
+        SwitchListTile(
+          value:useScrap,
+          onChanged:(v)=>setState(()=>useScrap=v),
+          title:const Text('Scrap Reward Wallet उपयोग करें'),
+          subtitle:const Text('Available reward balance पहले adjust होगा'),
+        ),
+        const SizedBox(height:10),
+        Card(
+          child:Padding(
+            padding:const EdgeInsets.all(16),
+            child:Column(
+              crossAxisAlignment:CrossAxisAlignment.start,
+              children:[
+                Text('Items: ${widget.itemCount}'),
+                const Text('Delivery Charge: ₹0 (Demo)'),
+                const Divider(),
+                const Text('Final amount actual product selection के अनुसार calculate होगा।',style:TextStyle(fontWeight:FontWeight.bold)),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height:10),
+        FilledButton(
+          onPressed:(){
+            if(name.text.trim().isEmpty||mobile.text.trim().isEmpty||address.text.trim().isEmpty){
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('नाम, मोबाइल और पता भरें')));
+              return;
+            }
+            Navigator.push(context,MaterialPageRoute(builder:(_)=>OrderSuccessPage(
+              payment:payment,
+              eta:eta,
+              itemCount:widget.itemCount,
+            )));
+          },
+          child:const Text('Place Order'),
+        ),
+      ],
+    ),
+  );
+}
+
+class OrderSuccessPage extends StatelessWidget{
+  final String payment;
+  final String eta;
+  final int itemCount;
+  const OrderSuccessPage({super.key,required this.payment,required this.eta,required this.itemCount});
+  @override Widget build(BuildContext context){
+    const orderId='GB10001';
+    return Scaffold(
+      appBar:AppBar(title:const Text('Order Confirmed')),
+      body:Padding(
+        padding:const EdgeInsets.all(20),
+        child:Column(
+          mainAxisAlignment:MainAxisAlignment.center,
+          children:[
+            const CircleAvatar(radius:38,backgroundColor:Colors.green,child:Icon(Icons.check,color:Colors.white,size:48)),
+            const SizedBox(height:16),
+            const Text('Order Successfully Placed',style:TextStyle(fontSize:22,fontWeight:FontWeight.bold)),
+            const SizedBox(height:8),
+            Text('Order ID: #$orderId'),
+            Text('Items: $itemCount'),
+            Text('Payment: $payment'),
+            Text('Expected Delivery: $eta'),
+            const SizedBox(height:20),
+            SizedBox(
+              width:double.infinity,
+              child:FilledButton.icon(
+                onPressed:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>const TrackingPage(orderId:orderId))),
+                icon:const Icon(Icons.local_shipping),
+                label:const Text('Track Order'),
+              ),
+            ),
+            TextButton(
+              onPressed:()=>Navigator.popUntil(context,(r)=>r.isFirst),
+              child:const Text('Back to Home'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class TrackingPage extends StatelessWidget{
+  final String orderId;
+  const TrackingPage({super.key,required this.orderId});
+  @override Widget build(BuildContext context)=>Scaffold(
+    appBar:AppBar(title:const Text('Track Order')),
+    body:ListView(
+      padding:const EdgeInsets.all(16),
+      children:[
+        Text('Order #$orderId',style:const TextStyle(fontSize:20,fontWeight:FontWeight.bold)),
+        const SizedBox(height:16),
+        const _TrackStep(icon:Icons.receipt_long,title:'Order Placed',done:true),
+        const _TrackStep(icon:Icons.settings,title:'Processing',done:true),
+        const _TrackStep(icon:Icons.inventory_2,title:'Packed',done:false),
+        const _TrackStep(icon:Icons.local_shipping,title:'Out for Delivery',done:false),
+        const _TrackStep(icon:Icons.home,title:'Delivered',done:false),
+      ],
+    ),
+  );
+}
+
+class _TrackStep extends StatelessWidget{
+  final IconData icon; final String title; final bool done;
+  const _TrackStep({required this.icon,required this.title,required this.done});
+  @override Widget build(BuildContext context)=>ListTile(
+    leading:CircleAvatar(
+      backgroundColor:done?Colors.green:Colors.grey.shade300,
+      child:Icon(icon,color:done?Colors.white:Colors.grey.shade700),
+    ),
+    title:Text(title,style:TextStyle(fontWeight:done?FontWeight.bold:FontWeight.normal)),
+    trailing:Icon(done?Icons.check_circle:Icons.radio_button_unchecked,color:done?Colors.green:Colors.grey),
+  );
+}
 class Info extends StatelessWidget{final String text;const Info(this.text,{super.key});@override Widget build(BuildContext context)=>Container(margin:const EdgeInsets.only(bottom:8),padding:const EdgeInsets.all(14),decoration:BoxDecoration(color:Colors.green.shade50,borderRadius:BorderRadius.circular(12),border:Border.all(color:Colors.green.shade200)),child:Text(text));}
