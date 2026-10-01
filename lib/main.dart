@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'admin.dart';
 
 void main() => runApp(const GallaBazarApp());
 
@@ -57,6 +58,8 @@ class _HomePageState extends State<HomePage> {
       action('किसान रजिस्ट्रेशन • 0% कमीशन सीधे Nutrigrain को बेचें', Colors.green, () => open(const FormPage('Farmer Registration', ['नाम','मोबाइल','गांव / Satna District','अनाज','मात्रा kg','अपेक्षित रेट ₹/kg']))),
       const SizedBox(height: 10),
       action('Seller Registration • Marketplace पर बेचें', Colors.blue, () => open(const FormPage('Seller Registration', ['नाम / Business','मोबाइल','पता','Seller Type','Product','Quantity','Rate']))),
+      const SizedBox(height: 14),
+      OutlinedButton.icon(onPressed: () => open(const AdminLoginPage()), icon: const Icon(Icons.admin_panel_settings), label: const Text('Admin Panel')),
     ]),
   );
 
