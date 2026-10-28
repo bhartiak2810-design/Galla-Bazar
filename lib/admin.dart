@@ -1,68 +1,21 @@
 import 'package:flutter/material.dart';
 
-class AdminLoginPage extends StatefulWidget {
+class AdminLoginPage extends StatelessWidget {
   const AdminLoginPage({super.key});
-  @override
-  State<AdminLoginPage> createState() => _AdminLoginPageState();
-}
-
-class _AdminLoginPageState extends State<AdminLoginPage> {
-  final email = TextEditingController(text: 'admin@nutrigrain.in');
-  final pin = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Nutrigrain Admin')),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const Icon(Icons.admin_panel_settings, size: 72, color: Colors.green),
-          const SizedBox(height: 12),
-          const Text('Galla Bazar Admin Panel',
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: const Text('Nutrigrain Admin')),
+        body: const Center(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Text(
+              'Admin access is disabled until trusted server-side authentication is configured.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          const Text('Demo login PIN: 2026', textAlign: TextAlign.center),
-          const SizedBox(height: 22),
-          TextField(
-            controller: email,
-            decoration: const InputDecoration(
-              labelText: 'Admin Email',
-              border: OutlineInputBorder(),
             ),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: pin,
-            obscureText: true,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Admin PIN',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 14),
-          FilledButton.icon(
-            onPressed: () {
-              if (pin.text.trim() != '2026') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('गलत PIN')),
-                );
-                return;
-              }
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const AdminDashboardPage()),
-              );
-            },
-            icon: const Icon(Icons.login),
-            label: const Text('Login'),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      );
 }
 
 class AdminDashboardPage extends StatefulWidget {
